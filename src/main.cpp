@@ -7,8 +7,8 @@
 const int n=8; //n=RPM moving average
 uint8_t RPM,Speed;
 long int RPM_count,timeold;
-float radius_inches,radius_meter,diameter;
-unsigned int pulse_around;
+float radius_inches=p,radius_meter,diameter;
+unsigned int pulse_around=f;
 
 //Pressure
 const int m=15; //m=Pressure moving average
@@ -35,8 +35,6 @@ void setup() {
     ; //wait for serial port to connect. Needed for native USB port only
   }
   //Hall-RPM
-  pulse_around=f;
-  radius_inches=p;
   radius_meter=radius_inches/39.97;
   diameter=2*radius_meter*PI;
 
