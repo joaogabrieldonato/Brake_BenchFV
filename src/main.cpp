@@ -100,9 +100,9 @@ void loop() {
     //Temperature
     Temperature=Temp_Sensor();
 
-    //Serial_prt();
+    Serial_prt();
+    LogSDCard();
   }
-  LogSDCard();
 }
 
 void RPM_counter_ISR() {
