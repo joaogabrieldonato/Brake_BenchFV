@@ -24,6 +24,7 @@ void RPM_counter_ISR();
 float Pressure_Sensor();
 double Temp_Sensor();
 void LogSDCard();
+String packetsd();
 int CountFiles(File dir);
 void LCD_Show();
 void Serial_prt();
@@ -70,17 +71,17 @@ void setup() {
   int num_files = CountFiles(root);
   sprintf(name_file, "/%s%d.csv", "Brake_data", num_files+1);
 
-  String info ="";
-    info +="RPM,";
-    info += "SPEED,";
-    info += "TIME,";
-    info += "PRESSURE,";
-    info += "TEMPERATURE";
+  String setup ="";
+    setup +="RPM,";
+    setup += "SPEED,";
+    setup += "TIME,";
+    setup += "PRESSURE,";
+    setup += "TEMPERATURE";
 
   Brake_CSV = SD.open(name_file, FILE_APPEND); //open file
   if (Brake_CSV) {
     Serial.println("Done!");
-    Brake_CSV.println(info);
+    Brake_CSV.println(setup);
     Brake_CSV.close();
   } 
 }
@@ -191,21 +192,14 @@ double Temp_Sensor() {
 
 void LogSDCard() {
 
-  String info = "";
-    info += float(RPM);
-    info += String(",");
-    info += float(Speed);
-    info += String(",");
-    info += int(timeold);
-    info += String(",");
-    info += float(Pressure);
-    info += String(",");
-    info += float(Temperature);
-
   Brake_CSV = SD.open(name_file, FILE_APPEND);
   if (Brake_CSV) {
-    Brake_CSV.println(info);
+
+    Brake_CSV.println(packetsd());
     Brake_CSV.close();
+    blinksaving= !blinksaving;
+    digitalWrite(DEBUG_LED, blinksaving);
+
   } else {
     Serial.println(F("ERRO"));
     digitalWrite(DEBUG_LED, HIGH);
@@ -229,6 +223,7 @@ int CountFiles(File dir) {
 }
 
 void LCD_Show() {
+
   lcd.setCursor(0,0);
   lcd.print("ROT:");
   lcd.setCursor(4,0);
@@ -245,9 +240,11 @@ void LCD_Show() {
   lcd.print("TEM:");
   lcd.setCursor(13,1);
   lcd.print(Temperature);
+
 }
 
 void Serial_prt() {
+
   Serial.print("RPM: ");
   Serial.println(RPM);
   Serial.print("Velocidade: ");
@@ -258,4 +255,21 @@ void Serial_prt() {
   Serial.println(Pressure);
   Serial.print("Temperatura: ");
   Serial.println(Temperature);
+
+}
+
+String packetsd() {
+
+  String info = "";
+    info += int(RPM);
+    info += String(",");
+    info += float(Speed);
+    info += String(",");
+    info += int(timeold);
+    info += String(",");
+    info += float(Pressure);
+    info += String(",");
+    info += float(Temperature);
+
+    return info;
 }

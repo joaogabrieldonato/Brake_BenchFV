@@ -9,6 +9,8 @@ File root;
 int num_files=0;
 char name_file[20];
 
+boolean blinksaving=false;
+
 //LCD
 #include <LiquidCrystal_I2C.h>
 #include <Ticker.h>
