@@ -19,12 +19,13 @@ const int Sample=800; //lcd times 2
 uint8_t Temperature;
 
 //general functions
-int Hall_Sensor();
 void RPM_counter_ISR();
+int Hall_Sensor();
 float Pressure_Sensor();
 double Temp_Sensor();
-void LogSDCard();
 String packetsd();
+void SD_Config();
+void LogSDCard();
 int CountFiles(File dir);
 void LCD_Show();
 void Serial_prt();
@@ -60,30 +61,7 @@ void setup() {
 
   //SD
   Serial.print("Starting the SD...");
-
-  if (SD.begin()) {
-    Serial.println("Completed Initialization!");
-  } else {
-    Serial.println("Error in initialization!!!");
-  }
-
-  root = SD.open("/");
-  int num_files = CountFiles(root);
-  sprintf(name_file, "/%s%d.csv", "Brake_data", num_files+1);
-
-  String setup ="";
-    setup +="RPM,";
-    setup += "SPEED,";
-    setup += "TIME,";
-    setup += "PRESSURE,";
-    setup += "TEMPERATURE";
-
-  Brake_CSV = SD.open(name_file, FILE_APPEND); //open file
-  if (Brake_CSV) {
-    Serial.println("Done!");
-    Brake_CSV.println(setup);
-    Brake_CSV.close();
-  } 
+  SD_Config();
 }
 
 void loop() {
@@ -106,33 +84,37 @@ void loop() {
   }
 }
 
+//Hall Sensor Functions
+
 void RPM_counter_ISR() {
   //Hall-RPM-Interrupt call
   RPM_count++;
 }
 
 int Hall_Sensor() {
-  uint8_t RPMx,RPMy;
+  uint8_t RPM_input,RPM_value;
   uint8_t RPMx_average[n],RPM_acc;
 
   //Hall-RPM
-  RPMx=(60*1000/pulse_around)/(millis()-timeold)*RPM_count;
+  RPM_input=(60*1000/pulse_around)/(millis()-timeold)*RPM_count;
   for (int i=0; i<n; i++) {
-    RPMx_average[0]=RPMx;
+    RPMx_average[0]=RPM_input;
     RPMx_average[1]=RPMx_average[-1]; 
   }
   for (int j=0; j<n; j++) {
     RPM_acc+=RPMx_average[j];
   }
-  RPMy=RPM_acc/n;
+  RPM_value=RPM_acc/n;
   RPM_acc=0;
 
-  return RPMy;
+  return RPM_value;
 }
+
+//Pressure Sensor Functions
 
 float Pressure_Sensor() {
   uint8_t Analog_Pressure,Pressure_average[m];
-  uint8_t pressure_acc,pressureX, Pressure_Value=0;
+  uint8_t pressure_acc,pressure_in, Pressure_Value=0;
 
   Analog_Pressure=analogRead(PressurePin);
   for (int i=0; i<m; i++) {
@@ -142,14 +124,16 @@ float Pressure_Sensor() {
   for (int j=0; j<m; j++) {
     pressure_acc+=Pressure_average[j];
   }
-  pressureX=pressure_acc/m;
+  pressure_in=pressure_acc/m;
   pressure_acc=0;
   //conversion of the analog read to psi
   Pressure_Value=
-  ((pressureX-Pressure_Zero)*PressureTransducerMax_PSI)/(PressureMax-Pressure_Zero);
+  ((pressure_in-Pressure_Zero)*PressureTransducerMax_PSI)/(PressureMax-Pressure_Zero);
 
   return Pressure_Value;
 }
+
+//Temperature Sensor Functions
 
 double Temp_Sensor() {
   double calc_1,calc_2,calc_3,calc_fv; 
@@ -190,6 +174,51 @@ double Temp_Sensor() {
   //return temp_result;
 }
 
+//SD Functions
+
+String packetsd() {
+
+  String info = "";
+    info += int(RPM);
+    info += String(",");
+    info += float(Speed);
+    info += String(",");
+    info += int(timeold);
+    info += String(",");
+    info += float(Pressure);
+    info += String(",");
+    info += float(Temperature);
+
+  return info;
+}
+
+void SD_Config() { 
+
+  if (SD.begin()) {
+    Serial.println("Completed Initialization!");
+  } else {
+    Serial.println("Error in initialization!!!");
+  }
+
+  root = SD.open("/");
+  int num_files = CountFiles(root);
+  sprintf(name_file, "/%s%d.csv", "Brake_data", num_files+1);
+
+  String setup ="";
+    setup +="RPM,";
+    setup += "SPEED,";
+    setup += "TIME,";
+    setup += "PRESSURE,";
+    setup += "TEMPERATURE";
+
+  Brake_CSV = SD.open(name_file, FILE_APPEND); //open file
+  if (Brake_CSV) {
+    Serial.println("Done!");
+    Brake_CSV.println(setup);
+    Brake_CSV.close();
+  }
+}
+
 void LogSDCard() {
 
   Brake_CSV = SD.open(name_file, FILE_APPEND);
@@ -199,6 +228,7 @@ void LogSDCard() {
     Brake_CSV.close();
     blinksaving = !blinksaving;
     digitalWrite(DEBUG_LED, blinksaving);
+    delay(100);
 
   } else {
     Serial.println(F("ERRO"));
@@ -222,6 +252,8 @@ int CountFiles(File dir) {
   return fileCountOnSD -1;
 }
 
+//LCD Function
+
 void LCD_Show() {
 
   lcd.setCursor(0,0);
@@ -243,6 +275,8 @@ void LCD_Show() {
 
 }
 
+//Serial Monitor
+
 void Serial_prt() {
 
   Serial.print("RPM: ");
@@ -256,20 +290,4 @@ void Serial_prt() {
   Serial.print("Temperatura: ");
   Serial.println(Temperature);
 
-}
-
-String packetsd() {
-
-  String info = "";
-    info += int(RPM);
-    info += String(",");
-    info += float(Speed);
-    info += String(",");
-    info += int(timeold);
-    info += String(",");
-    info += float(Pressure);
-    info += String(",");
-    info += float(Temperature);
-
-  return info;
 }
