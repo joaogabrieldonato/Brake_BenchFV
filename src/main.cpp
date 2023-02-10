@@ -49,7 +49,6 @@ void setup() {
 
   //Temperature
   mlx.begin();
-  mlx.writeEmissivity(Emissivity); // set emissivity of read (boracha +- 0,92)
 
   //LCD
   lcd.init();

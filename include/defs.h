@@ -22,7 +22,6 @@ const int PressureTransducerMax_PSI=600; //psi transdutor value
 //Temperature
 #include <Adafruit_MLX90614.h>
 Adafruit_MLX90614 mlx = Adafruit_MLX90614();
-double Emissivity=0.92;
 
 #endif
 
