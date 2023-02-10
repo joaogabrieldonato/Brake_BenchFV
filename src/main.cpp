@@ -197,7 +197,7 @@ void LogSDCard() {
 
     Brake_CSV.println(packetsd());
     Brake_CSV.close();
-    blinksaving= !blinksaving;
+    blinksaving = !blinksaving;
     digitalWrite(DEBUG_LED, blinksaving);
 
   } else {
@@ -271,5 +271,5 @@ String packetsd() {
     info += String(",");
     info += float(Temperature);
 
-    return info;
+  return info;
 }

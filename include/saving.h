@@ -8,6 +8,7 @@ File Brake_CSV; //Create a file to store the data
 File root;
 int num_files=0;
 char name_file[20];
+Ticker sdticker;
 
 boolean blinksaving=false;
 
