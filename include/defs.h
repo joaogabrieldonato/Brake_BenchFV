@@ -1,6 +1,8 @@
 #ifndef DEFS_H
 #define DEFS_H
 
+#include <stdio.h>
+
 //Pins
 #define DEBUG_LED 2
 #define HallPin 15
